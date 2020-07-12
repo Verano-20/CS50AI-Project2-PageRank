@@ -57,7 +57,17 @@ def transition_model(corpus, page, damping_factor):
     linked to by `page`. With probability `1 - damping_factor`, choose
     a link at random chosen from all pages in the corpus.
     """
-    raise NotImplementedError
+    distribution = dict()
+
+    # Add probabilities of choosing a random page
+    for everypage in corpus:
+        distribution[everypage] = (1 - damping_factor) / len(corpus)
+
+    # Add probablities of choosing each linked page
+    for linkedpage in corpus[page]:
+        distribution[linkedpage] += damping_factor / len(corpus[page])
+
+    return distribution
 
 
 def sample_pagerank(corpus, damping_factor, n):
@@ -69,7 +79,27 @@ def sample_pagerank(corpus, damping_factor, n):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+    pagerank = dict()
+
+    # Add all pages in corpus to pagerank
+    for everypage in corpus:
+        pagerank[everypage] = 0
+
+    # Get initial page randomly from all pages
+    currentpage = random.choice(list(corpus.keys()))
+
+    # Loop until n is reached
+    i=0
+    while i < n:
+        i += 1
+        # Add (normalised) one to count of current page in pagerank
+        pagerank[currentpage] += 1 / n
+        # Get transition model for current page
+        transition = transition_model(corpus, currentpage, damping_factor)
+        # Choose next page using weighted random selection from transition model of current page
+        currentpage = random.choices(list(transition.keys()), weights = list(transition.values()), k=1)[0]
+
+    return pagerank
 
 
 def iterate_pagerank(corpus, damping_factor):
@@ -81,7 +111,40 @@ def iterate_pagerank(corpus, damping_factor):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+    pagerank = dict()
+
+    # Add all pages in corpus to pagerank and give initial vaues 1/N
+    for everypage in corpus:
+        pagerank[everypage] = 1 / len(corpus)
+    
+    # Calculate new pagerank values
+    while True:
+        loop = False
+        for p in pagerank.keys():
+            # Get starting pagerank to check difference
+            startrank = pagerank[p]
+            # Probability of randomly landing on page
+            PR = (1 - damping_factor / len(corpus))
+            # Check all pages in corpus
+            for page in corpus.keys():
+                # If page has a link to p, update PR
+                if p in corpus[page]:
+                    PR += damping_factor * (pagerank[page] / len(corpus[page]))
+            # Update pagerank
+            pagerank[p] = PR
+            # If value for any page has changed by more than 0.001, loop again
+            if abs(startrank - PR) > 0.001:
+                loop = True
+
+        if not loop:
+            break
+
+    # Normalise all pagerank values
+    alpha = 1 / sum(pagerank.values())
+    for page in pagerank:
+        pagerank[page] = alpha * pagerank[page]
+
+    return pagerank
 
 
 if __name__ == "__main__":

@@ -1,5 +1,7 @@
 # CS50AI-Project2-PageRank
 
+My solution for CS50AI project 2 - PageRank.
+
 The Pagerank algorithm, developed by Google's co-founders, enables webpages to be ranked by 'importance'. A webpage is ranked as more important if it is linked to by other important webpages, and less important if it is only linked to by less important webpages.
 
 This program calculates a pagerank for a set of webpages using a Random Surfer Model, and an Iterative Algorithm method.
